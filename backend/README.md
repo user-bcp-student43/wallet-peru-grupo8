@@ -8,4 +8,9 @@ Código fuente y pruebas del backend.
 - `src/test/`: pruebas del backend.
 - `.env.example`: plantilla de variables de entorno.
 
-Las tecnologías y los comandos de ejecución están pendientes de definir.
+## Tecnología
+
+- Java + Quarkus.
+- La persistencia se implementará detrás de una capa de repositorios/DAO; el motor de base de datos está pendiente de definir.
+
+Los comandos de ejecución se documentarán cuando se configure el proyecto.
