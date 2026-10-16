@@ -2,4 +2,4 @@
 
 Proveedor de pagos simulado para desarrollo y pruebas.
 
-El comportamiento y los comandos de ejecución están pendientes de definir.
+Los pagos no forman parte del alcance de la demo de onboarding. Esta carpeta queda reservada para una historia posterior; no debe conectarse a redes o proveedores reales ni simular una transferencia hasta que se defina su contrato y sus criterios de prueba.

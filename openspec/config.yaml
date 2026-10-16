@@ -1,0 +1,40 @@
+schema: spec-driven
+
+githubCopilot:
+  cloudAgent: false
+
+context: |
+  Escribe propuestas, especificaciones, diseños y tareas
+  en español.
+
+  Consulta los documentos vigentes antes de planificar:
+  - docs/scope.md
+  - docs/onboarding.md
+  - docs/user-stories-and-acceptance.md
+  - docs/ENDPOINTS.md
+  - docs/architecture.md
+  - docs/decisions-assumptions-limitations.md
+
+  Usa docs/implementation-plan.md como propuesta de ejecución,
+  docs/TESTING.md como plan de verificación y docs/demo-script.md
+  como guía para reproducir la demo.
+
+  Consulta docs/wallet-demo-sprints.md para el contexto
+  y la distribución del trabajo por sprint.
+
+  Distingue comportamiento implementado, requisitos objetivo,
+  decisiones acordadas y propuestas pendientes.
+
+  Ante contradicciones entre documentos, identifica los puntos
+  afectados; no inventes una resolución ni una prioridad implícita.
+
+  Conserva la distinción entre servicios simulados
+  e integraciones verificadas con backend.
+
+rules:
+  design:
+    - Referenciar las decisiones arquitectónicas aplicables.
+    - Identificar contratos API nuevos o modificados.
+  tasks:
+    - Relacionar las tareas con los criterios de aceptación.
+    - Incluir verificación y evidencia de los comportamientos.
