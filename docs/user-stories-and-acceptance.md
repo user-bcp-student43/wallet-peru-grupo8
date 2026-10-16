@@ -1,5 +1,7 @@
 # Historias de usuario y criterios de aceptación
 
+Pendiente de definir. Documentar aquí cada historia de usuario junto con sus
+criterios de aceptación verificables.
 El nuevo flujo descrito aquí está pendiente de implementación. Podman, H2 en memoria y Mailpit local están acordados. Se admiten DNI y pasaporte; el OTP de cuatro dígitos vence a los cinco minutos, permite tres intentos y no se reenvía. OTP y PIN se protegen con HMAC-SHA-256, sal aleatoria por credencial y clave secreta externa. El estado se centraliza en [decisions-assumptions-limitations.md](./decisions-assumptions-limitations.md).
 
 ## Historia — Registro y activación
