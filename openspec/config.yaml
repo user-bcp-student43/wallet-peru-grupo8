@@ -7,52 +7,34 @@ context: |
   Escribe propuestas, especificaciones, diseños y tareas
   en español.
 
-  El alcance actual de implementación es el frontend.
-  Las historias incluyen tareas de otras disciplinas;
-  distingue esas dependencias de las tareas del frontend.
+  Consulta los documentos vigentes antes de planificar:
+  - docs/scope.md
+  - docs/onboarding.md
+  - docs/user-stories-and-acceptance.md
+  - docs/ENDPOINTS.md
+  - docs/architecture.md
+  - docs/decisions-assumptions-limitations.md
 
-  La demo utiliza datos ficticios y un proveedor
-  de pagos simulado.
-  Los servicios simulados deben poder reemplazarse
-  por integraciones reales.
+  Usa docs/implementation-plan.md como propuesta de ejecución,
+  docs/TESTING.md como plan de verificación y docs/demo-script.md
+  como guía para reproducir la demo.
 
-  Cada cambio debe indicar si su alcance corresponde
-  a frontend, backend o integración.
+  Consulta docs/wallet-demo-sprints.md para el contexto
+  y la distribución del trabajo por sprint.
 
-  Distingue la evidencia obtenida con mocks de las pruebas
-  realizadas contra el backend.
+  Distingue comportamiento implementado, requisitos objetivo,
+  decisiones acordadas y propuestas pendientes.
 
-  No inventes requisitos KYC ni reglas regulatorias.
-  Documenta como preguntas abiertas las decisiones de negocio
-  que no estén resueltas.
+  Ante contradicciones entre documentos, identifica los puntos
+  afectados; no inventes una resolución ni una prioridad implícita.
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+  Conserva la distinción entre servicios simulados
+  e integraciones verificadas con backend.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
-
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+rules:
+  design:
+    - Referenciar las decisiones arquitectónicas aplicables.
+    - Identificar contratos API nuevos o modificados.
+  tasks:
+    - Relacionar las tareas con los criterios de aceptación.
+    - Incluir verificación y evidencia de los comportamientos.

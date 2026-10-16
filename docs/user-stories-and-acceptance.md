@@ -1,41 +1,29 @@
 # Historias de usuario y criterios de aceptación
 
-## Historia 1 — Registro y activación con revisión humana
+El nuevo flujo descrito aquí está pendiente de implementación. Podman, H2 en memoria y Mailpit local están acordados. Se admiten DNI y pasaporte; el OTP de cuatro dígitos vence a los cinco minutos, permite tres intentos y no se reenvía. OTP y PIN se protegen con HMAC-SHA-256, sal aleatoria por credencial y clave secreta externa. El estado se centraliza en [decisions-assumptions-limitations.md](./decisions-assumptions-limitations.md).
 
-**Como** usuario que realiza transferencias de bajo monto, **quiero** ingresar mis datos, obtener aprobación humana, verificar mi correo y crear un PIN, **para** activar mi wallet de demo.
+## Historia — Registro y activación
 
-### Criterios de aceptación
-
-1. El formulario inicial solicita tipo de documento, DNI y correo personal y valida los campos antes de enviar.
-2. Al enviar, el backend consulta el DNI en la fuente sintética y crea una solicitud pendiente de decisión humana; no envía OTP ni activa wallet antes de aprobación.
-3. Solo una persona revisora autorizada puede aprobar o rechazar. Se registra el resultado, quién decidió y cuándo; una solicitud resuelta no admite otra decisión.
-4. Si se rechaza, el usuario permanece en la primera pantalla y ve exactamente: “Su registro está en evaluación. Nos estaremos comunicando contigo en las siguientes horas”. No se revela el motivo ni se envía OTP.
-5. Si se aprueba, se envía OTP de cuatro dígitos al buzón simulado. OTP incorrecto, expirado, reutilizado o sobre el límite de intentos no permite avanzar.
-6. Un OTP válido habilita el campo PIN numérico de cuatro dígitos. Al continuar, se crea el cliente de la aplicación y una wallet con S/ 100.00 PEN ficticios, una sola vez.
-7. La pantalla inicial muestra el nombre y apellido asociados al DNI y el saldo consultado al backend. Los errores o estados previos no crean wallet activa ni crédito inicial.
-8. Logs, eventos de auditoría, analítica y trazas no contienen DNI, nombre, apellido o correo en claro; decisión y avance se rastrean por ID aleatorio de solicitud, actor opaco, estado y fecha/hora.
-9. La interfaz muestra el paso actual y la secuencia restante en cada pantalla; entrada inválida bloquea el avance y presenta una corrección accionable.
-10. Se registran eventos de inicio, finalización de pasos y cierre con ID opaco y timestamps, sin datos del formulario ni credenciales.
-11. Al completar el onboarding, la wallet queda activa y la pantalla ofrece un punto de entrada a pagos de bajo monto; el procesamiento de pagos no forma parte de esta demo.
-
-## Historia 2 — Persona revisora de registros
-
-**Como** persona revisora autorizada, **quiero** consultar solicitudes pendientes y aprobarlas o rechazarlas, **para** decidir cuáles pueden continuar el onboarding.
+**Como** usuario que realiza transferencias de bajo monto, **quiero** ingresar mis datos, verificar mi correo y crear un PIN, **para** activar mi wallet de demo.
 
 ### Criterios de aceptación
 
-1. La persona revisora solo ve solicitudes pendientes y la información mínima necesaria para decidir.
-2. Puede registrar una decisión de aprobar o rechazar; se almacena el revisor y la fecha de decisión.
-3. Una solicitud decidida sale de la cola pendiente y no puede resolverse por segunda vez.
-4. La aprobación permite continuar a OTP; el rechazo no envía OTP y presenta al usuario el mensaje genérico definido en Historia 1.
-5. La operación de revisión no está disponible para el usuario que solicita el registro ni para llamadas sin autorización.
-6. La trazabilidad de cada decisión contiene solicitud, actor, decisión y fecha/hora, pero no PII en claro.
+1. El formulario inicial solicita tipo de documento (DNI o pasaporte), número de documento y correo personal y valida los campos antes de enviar.
+2. Al enviar, el backend consulta los datos sintéticos por tipo y número de documento y emite al buzón simulado un OTP de cuatro dígitos, sin etapa de revisión humana.
+3. El inicio y la verificación OTP no revelan el resultado del lookup. Para una solicitud sin coincidencia, la finalización bloquea la activación con un error genérico; se acepta que comparar el resultado con una activación exitosa permite inferir indirectamente la coincidencia.
+4. OTP incorrecto, vencido o reutilizado no permite avanzar. El código vence a los cinco minutos, no se puede reenviar y después de tres intentos fallidos se bloquea con el mensaje “Agotaste tus intentos permitidos”.
+5. Un OTP válido habilita el campo PIN numérico de cuatro dígitos. Al continuar, se crea el cliente de la aplicación y una wallet con S/ 100.00 PEN ficticios, una sola vez.
+6. La pantalla inicial muestra el nombre y apellido asociados al documento y el saldo consultado al backend. Los estados previos no crean wallet activa ni crédito inicial.
+7. Logs, eventos de auditoría, analítica y trazas no contienen DNI, nombre, apellido o correo en claro; solicitud y avance se rastrean por ID aleatorio.
+8. La interfaz muestra el paso actual y la secuencia restante en cada pantalla; entrada inválida bloquea el avance y presenta una corrección accionable.
+9. Se registran eventos de inicio, finalización de pasos y cierre con ID opaco y timestamps, sin datos del formulario ni credenciales.
+10. Al completar el onboarding, la wallet queda activa y recibe el crédito inicial ficticio de S/ 100.00 PEN exactamente una vez, incluso ante reintentos. El procesamiento de pagos no forma parte del nuevo alcance.
 
 ## Criterios de la historia fuente y tratamiento en demo
 
 - **Progreso y validación:** cubiertos por criterios 1 y 9; el paso actual y los siguientes se muestran y errores bloquean el avance.
-- **Wallet activa y entrada a pagos:** cubiertos por criterios 6 y 11; se muestra un punto de entrada visual, sin procesar pagos.
-- **Eventos de onboarding:** cubiertos por criterio 10 con timestamps e ID opaco, excluyendo PII.
+- **Wallet activa y entrada a pagos:** cubiertos por criterios 5 y 10; se muestra un punto de entrada visual, sin procesar pagos.
+- **Eventos de onboarding:** cubiertos por criterio 9 con timestamps e ID opaco, excluyendo PII.
 - **Mediana de 8 a 3 minutos, MAU 1,000–2,000 y CAC PEN 10:** objetivos de lanzamiento en la historia oficial; requieren cohortes y datos reales y no se declaran alcanzados con la demo sintética.
 
 ## Alcance demo

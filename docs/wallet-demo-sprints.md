@@ -1,4 +1,7 @@
 HISTORIAS, TAREAS Y ENTREGABLES POR SPRINT
+
+> **Referencia histórica:** este plan describe la versión anterior, que incluía pagos simulados. Se conserva sin cambiar sus historias ni tareas completadas; no representa el alcance vigente. Consulta el [alcance vigente](./scope.md) y el [onboarding nuevo](./onboarding.md). Las decisiones abiertas están centralizadas en [decisiones](./decisions-assumptions-limitations.md).
+
 Alcance de la demo: un recorrido del pagador con datos ficticios y proveedor de pagos simulado. Las metas trimestrales de negocio no se considerarán resultados demostrados por el prototipo.
 
 Sprint 1 ---> Registro, activación y pago exitoso

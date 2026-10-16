@@ -1,23 +1,24 @@
 # Contrato de endpoints — onboarding demo
 
-Versión inicial para coordinar React y Quarkus. El contrato describe la demo seleccionada; no representa una API productiva. Base URL local: `/api/v1`.
+Contrato implementado por el servicio Quarkus y publicado como OpenAPI; las pruebas REST cubren rutas, estados, validación y autorización. La integración end-to-end con Mailpit real y la verificación automatizada completa contra los DTOs frontend siguen pendientes. Se admiten DNI y pasaporte, no hay etapa de revisión humana y el OTP de cuatro dígitos vence a los cinco minutos, permite tres intentos y no se puede reenviar. OTP y PIN se guardan como HMAC-SHA-256 con sal aleatoria por credencial y una clave secreta externa; las comparaciones son en tiempo constante y no se registran credenciales en claro. El frontend consulta el estado cada tres segundos mientras espera y detiene el polling al verificar OTP o al fallar. Ver [decisiones](./decisions-assumptions-limitations.md) y [onboarding](./onboarding.md). Este contrato no incluye procesamiento de pagos; sí contempla activación y crédito inicial idempotentes. Base URL: `/api/v1`.
 
 ## Reglas generales
 
 - JSON UTF-8 para solicitudes y respuestas.
-- El backend es autoridad para estado HITL, OTP, registro y saldo.
+- El backend es autoridad para estado de solicitud, OTP, registro y saldo.
 - El frontend nunca consulta directamente la base de datos.
 - DNI, nombre, apellido, correo, OTP y PIN son datos sensibles: no registrarlos en logs, auditoría, métricas, trazas HTTP ni mensajes de error. No activar logging de cuerpos HTTP.
 - Los endpoints de una solicitud requieren un token de seguimiento aleatorio en la cabecera de autorización; no registrar el token, guardarlo en URLs ni persistirlo en `localStorage`. El frontend lo mantiene en memoria de sesión.
-- Las operaciones `/reviewer/*` requieren credencial de rol revisor configurada fuera del repositorio. No aceptar decisiones de revisión de la sesión del usuario.
+- El formato del encabezado protegido es `Authorization: Bearer <TOKEN_ALEATORIO>`.
+- En los endpoints posteriores al inicio, enviar el token como `Authorization: Bearer <TOKEN_ALEATORIO>`.
 - IDs de solicitud son aleatorios/opacos, no derivados de DNI, correo u otro dato personal. No usar hashes simples de estos datos como IDs: son susceptibles a enumeración.
 - Política CORS local: permitir solo el origin del frontend configurado para desarrollo.
 
 ## Estados
 
-`PENDING_REVIEW` → `OTP_PENDING` → `OTP_VERIFIED` → `ACTIVE`
+`OTP_PENDING` → `OTP_VERIFIED` → `ACTIVE`
 
-La decisión negativa resulta en `REJECTED`. Un OTP inválido no cambia el estado; al alcanzar el límite, la solicitud queda bloqueada para verificación. Los estados terminales no se pueden reabrir en esta demo.
+No hay estados ni decisiones de revisión humana. Un OTP inválido no permite avanzar; después de tres intentos fallidos se bloquea la verificación de ese código. Los estados terminales no se pueden reabrir en esta demo.
 
 ## 1. Iniciar solicitud de onboarding
 
@@ -26,7 +27,7 @@ La decisión negativa resulta en `REJECTED`. Un OTP inválido no cambia el estad
 ```json
 {
   "documentType": "DNI",
-  "documentNumber": "<DNI_SINTETICO>",
+  "documentNumber": "<DOCUMENTO_SINTETICO>",
   "email": "<CORREO_SINTETICO>"
 }
 ```
@@ -37,12 +38,12 @@ Respuesta `202 Accepted`:
 {
   "requestId": "<UUID_OPACO>",
   "trackingToken": "<TOKEN_ALEATORIO>",
-  "status": "PENDING_REVIEW",
-  "message": "Tu solicitud está en revisión."
+  "status": "OTP_PENDING",
+  "message": "Ingresa el código enviado a tu correo."
 }
 ```
 
-El servidor busca la persona por tipo y número de documento, compara el correo asociado y coloca la solicitud en la cola HITL. No envía OTP ni crea una cuenta o wallet en esta etapa. El resultado de la coincidencia no se devuelve al solicitante.
+El backend busca por tipo y número de documento en los datos sintéticos y emite el OTP al buzón simulado al iniciar la solicitud. Los tipos admitidos son `DNI` y `PASSPORT`. La respuesta de inicio es la misma con o sin coincidencia y no comunica el resultado del lookup. Para documentos sin coincidencia, el flujo permite verificar el OTP, pero la finalización no crea cliente ni wallet y devuelve el error genérico `ONBOARDING_NOT_COMPLETABLE`. Se acepta que comparar este resultado con una activación exitosa permite inferir indirectamente la coincidencia; es un riesgo residual aprobado para la demo.
 
 ## 2. Consultar estado de la solicitud
 
@@ -53,67 +54,17 @@ Requiere token de seguimiento. Respuesta `200 OK`:
 ```json
 {
   "requestId": "<UUID_OPACO>",
-  "status": "PENDING_REVIEW",
-  "nextStep": "WAIT_FOR_REVIEW",
+  "status": "OTP_PENDING",
+  "nextStep": "ENTER_OTP",
   "message": null
 }
 ```
 
-Al aprobar, `status` cambia a `OTP_PENDING` y `nextStep` a `ENTER_OTP`. Al rechazar, `status` es `REJECTED`, `nextStep` es `NONE` y `message` contiene exactamente: `Su registro está en evaluación. Nos estaremos comunicando contigo en las siguientes horas`.
+Al validar correctamente el OTP, `status` cambia a `OTP_VERIFIED` y `nextStep` pasa a `CREATE_PIN`.
 
-El frontend consulta este estado cada 3 segundos mientras esté pendiente y detiene las consultas al llegar a un estado terminal; no registrar token ni respuesta completa. El correlador aleatorio puede vincularse internamente a una solicitud operativa, cuyo acceso está restringido.
+El frontend consulta el estado cada tres segundos mientras la solicitud espera y detiene el polling al verificar OTP o al fallar; no hay paso de revisión. No registrar token ni respuesta completa. El correlador aleatorio puede vincularse internamente a una solicitud operativa, cuyo acceso está restringido.
 
-## 3. Listar solicitudes pendientes para revisión
-
-`GET /api/v1/reviewer/onboarding-requests?status=PENDING_REVIEW`
-
-Requiere rol revisor. Devuelve solo las solicitudes pendientes y la información mínima ofuscada necesaria para la decisión; nunca incluir DNI, correo o nombre completos:
-
-```json
-{
-  "items": [
-    {
-      "requestId": "<UUID_OPACO>",
-      "documentNumberMasked": "******<ULTIMOS_2>",
-      "nameMasked": "<INICIALES>",
-      "emailMasked": "<CORREO_OFUSCADO>",
-      "syntheticRecordMatch": true,
-      "createdAt": "<FECHA_ISO_8601>"
-    }
-  ]
-}
-```
-
-Los marcadores son ilustrativos; se usarán únicamente fixtures ficticios. Como regla visual, el documento muestra solo los últimos dos dígitos, los nombres solo iniciales y el correo queda enmascarado sin mostrar el dominio completo. La decisión humana se registra con actor seudónimo, decisión y fecha/hora, sin datos personales ni texto libre que pueda contenerlos.
-
-## 4. Registrar decisión HITL
-
-`POST /api/v1/reviewer/onboarding-requests/{requestId}/decision`
-
-Requiere rol revisor.
-
-```json
-{ "decision": "APPROVE" }
-```
-
-o
-
-```json
-{ "decision": "REJECT" }
-```
-
-Respuesta `200 OK`:
-
-```json
-{
-  "requestId": "<UUID_OPACO>",
-  "status": "OTP_PENDING"
-}
-```
-
-Con `APPROVE`, el servidor emite el OTP al buzón simulado y cambia el estado. Con `REJECT`, cambia a `REJECTED` y no envía OTP. Si la decisión ya fue registrada, responder `409 Conflict` sin cambiar datos.
-
-## 5. Verificar OTP
+## 3. Verificar OTP
 
 `POST /api/v1/onboarding-requests/{requestId}/otp/verify`
 
@@ -127,21 +78,15 @@ Respuesta `200 OK`:
 { "requestId": "<UUID_OPACO>", "status": "OTP_VERIFIED" }
 ```
 
-Solo el verificador asociado a la solicitud puede validar el código. No se devuelve el OTP ni información que permita reconstruirlo.
+La verificación ocurre en el backend. El OTP vence cinco minutos después de su emisión. El backend conserva solo HMAC-SHA-256 calculado con una sal aleatoria por credencial y una clave secreta externa a la aplicación; compara en tiempo constante. El código en claro solo está disponible transitoriamente para su entrega al buzón simulado. No se devuelve ni registra el OTP.
 
-## 6. Reenviar OTP
+Se permiten tres intentos de verificación por código. Al agotarlos, la verificación se bloquea y responde `ATTEMPTS_EXHAUSTED`. Los códigos incorrectos o vencidos responden con `INVALID_OTP`, sin distinguir el motivo. No se permite reenviar el OTP.
 
-`POST /api/v1/onboarding-requests/{requestId}/otp/resend`
+## 4. Reenvío OTP
 
-Respuesta `202 Accepted`:
+No se publica ni implementa un endpoint de reenvío OTP en esta demo.
 
-```json
-{ "requestId": "<UUID_OPACO>", "status": "OTP_PENDING" }
-```
-
-Aplican los límites definidos en `onboarding.md`. Responder `429 Too Many Requests` si se exceden.
-
-## 7. Completar registro y activar wallet
+## 5. Completar registro y activar wallet
 
 `POST /api/v1/onboarding-requests/{requestId}/complete`
 
@@ -149,7 +94,7 @@ Aplican los límites definidos en `onboarding.md`. Responder `429 Too Many Reque
 { "pin": "<PIN_NUMERICO_DE_4_DIGITOS>" }
 ```
 
-Solo se acepta en estado `OTP_VERIFIED`. Respuesta `201 Created`:
+Solo se acepta en estado `OTP_VERIFIED`. El PIN se conserva únicamente como HMAC-SHA-256 con sal aleatoria por credencial y clave secreta externa a la aplicación; la comparación es en tiempo constante. No registrar el PIN en claro. Respuesta `201 Created`:
 
 ```json
 {
@@ -175,15 +120,16 @@ Formato: `{ "code": "<CODIGO>", "message": "<MENSAJE_SEGURO>" }`. Los mensajes n
 | HTTP | Código | Uso |
 |---|---|---|
 | 400 | `INVALID_INPUT` | Campos/formato no válidos. |
-| 401/403 | `UNAUTHORIZED` / `FORBIDDEN` | Token de usuario ausente/inválido o rol insuficiente. |
+| 401 | `UNAUTHORIZED` | Token de seguimiento ausente o inválido. |
 | 404 | `REQUEST_NOT_FOUND` | Solicitud no accesible; no revelar si una persona existe. |
-| 409 | `INVALID_STATE` | Acción incompatible con estado actual o decisión ya resuelta. |
-| 422 | `INVALID_OTP` | OTP inválido; mensaje sin reflejar valor recibido. |
-| 429 | `RATE_LIMITED` | Límite de intentos o reenvíos alcanzado. |
+| 409 | `INVALID_STATE` | Acción incompatible con el estado actual. |
+| 422 | `ONBOARDING_NOT_COMPLETABLE` | No se puede completar el registro; no explica el motivo ni incluye datos ingresados. |
+| 422 | `INVALID_OTP` | OTP incorrecto o vencido antes de agotar los tres intentos; mensaje sin distinguir el motivo ni reflejar valor recibido. |
+| 429 | `ATTEMPTS_EXHAUSTED` | Se agotaron los tres intentos de OTP; informar al usuario con un mensaje como “Agotaste tus intentos permitidos”. |
 | 500 | `INTERNAL_ERROR` | Error genérico; detalle solo en canal técnico sin PII. |
 
-## Pendiente de implementación
+## Verificación pendiente
 
-- Publicar el contrato como OpenAPI al crear el servicio Quarkus y validar que request/response y códigos coincidan con esta especificación.
-- Acordar el mecanismo de actualización del estado pendiente (consulta periódica es suficiente para la demo).
+- Probar el recorrido integrado desde el frontend hasta Quarkus y el buzón Mailpit real.
+- Validar automáticamente que todos los request/response DTOs y códigos de estado coinciden con esta especificación.
 - Mantener ejemplos solo con marcadores o fixtures sintéticos y no copiar valores sensibles a tickets, capturas ni trazas.

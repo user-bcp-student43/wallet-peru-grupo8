@@ -2,34 +2,47 @@
 
 Repositorio del proyecto Wallet Peru del Grupo 8.
 
+## Estado actual
+
+- **Frontend existente:** React + TypeScript + Vite para la versión anterior del Sprint 1. Su servicio es local y simula activación, transferencia fija e historial; no se conecta al backend.
+- **Backend:** aún no tiene implementación ejecutable.
+- **Nuevo onboarding:** el flujo sin revisión humana, con OTP, PIN y activación de wallet está especificado, pero pendiente de implementar.
+- **Pagos:** procesar pagos está excluido del alcance nuevo. La activación y el crédito inicial ficticio de S/ 100.00 PEN sí están incluidos y deberán ser idempotentes.
+
+Podman, H2 en memoria y Mailpit local están acordados; el OTP vence en cinco minutos, admite tres intentos y no se reenvía. El estado central está en [docs/decisions-assumptions-limitations.md](docs/decisions-assumptions-limitations.md).
+
 ## Estructura
 
-- `docs/`: alcance, historias de usuario, arquitectura, decisiones y guion de demostración.
-- `backend/`: aplicación y pruebas del backend.
-- `frontend/`: aplicación web.
-- `mock-payment-provider/`: espacio reservado para una historia futura de pagos; no forma parte de esta demo.
-- `tests/`: pruebas de aceptación y datos de prueba.
+- `docs/`: alcance, historias, arquitectura, decisiones, contrato y guion.
+- `backend/`: estructura reservada para la implementación backend pendiente.
+- `frontend/`: frontend local de la versión anterior.
+- `mock-payment-provider/`: espacio reservado; no forma parte del nuevo onboarding.
+- `tests/`: criterios y datos sintéticos para pruebas.
 
-## Stack
+## Ejecutar el frontend existente
 
-- Frontend: React + TypeScript + Vite.
-- Backend: Java + Quarkus.
-- Persistencia local recomendada, pendiente de aprobación: H2 en memoria con fixtures sintéticos; se reinicia al iniciar la aplicación.
-- Correo de demo recomendado, pendiente de aprobación: Mailpit local para capturar SMTP; requiere Docker y no envía correos externos.
+Requisitos: Node.js y npm. Desde `frontend/`:
 
-## Funcionalidad inicial
+```bash
+npm install
+npm run dev
+```
 
-La funcionalidad inicial prevista es onboarding con decisión humana (HITL), verificación de correo mediante OTP simulado, creación de PIN y wallet con saldo ficticio inicial de S/ 100.00 PEN. El detalle está en [`docs/onboarding.md`](docs/onboarding.md).
+Scripts disponibles desde `frontend/`:
 
-## Documentación para construir y demostrar
+```bash
+npm run build
+npm run lint
+```
 
-- Alcance, historias y decisiones: [`docs/scope.md`](docs/scope.md), [`docs/user-stories-and-acceptance.md`](docs/user-stories-and-acceptance.md) y [`docs/decisions-assumptions-limitations.md`](docs/decisions-assumptions-limitations.md).
-- Arquitectura y contrato del backend: [`docs/architecture.md`](docs/architecture.md) y [`docs/ENDPOINTS.md`](docs/ENDPOINTS.md).
-- Pruebas y plan de implementación: [`docs/TESTING.md`](docs/TESTING.md) y [`docs/implementation-plan.md`](docs/implementation-plan.md).
-- Guion: [`docs/demo-script.md`](docs/demo-script.md).
+No hay script `test` configurado. Estos comandos solo ejecutan/verifican el frontend existente; no inician ni prueban el backend o el nuevo onboarding.
 
-La trazabilidad debe excluir DNI, nombre, apellido, correo, OTP y PIN en claro; correlacionar eventos con un ID aleatorio/opaco de solicitud. No usar hashes simples de datos personales como IDs. Usar exclusivamente datos sintéticos.
+## Documentación vigente
 
-## Estado y ejecución
+- [Alcance](docs/scope.md), [historias y criterios](docs/user-stories-and-acceptance.md) y [onboarding](docs/onboarding.md).
+- [Decisiones, supuestos y limitaciones](docs/decisions-assumptions-limitations.md).
+- [Arquitectura](docs/architecture.md), [contrato API propuesto](docs/ENDPOINTS.md) y [plan de implementación](docs/implementation-plan.md).
+- [Pruebas](docs/TESTING.md) y [guion de demo planificado](docs/demo-script.md).
+- [Plan de sprints de la versión anterior](docs/wallet-demo-sprints.md), conservado como referencia histórica.
 
-Las carpetas de frontend y backend contienen actualmente la estructura inicial. Los proyectos ejecutables, la base de datos, el buzón simulado y los comandos de instalación/ejecución aún deben configurarse. No se deben usar datos reales.
+Usar exclusivamente datos sintéticos. La trazabilidad debe excluir DNI, nombre, apellido, correo, OTP y PIN en claro; correlacionar eventos con un ID aleatorio/opaco y no con hashes simples de datos personales.

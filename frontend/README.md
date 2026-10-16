@@ -1,30 +1,52 @@
-# Billetera Demo
+# Billetera Demo — frontend de onboarding
 
-Aplicación frontend para reproducir el recorrido de una wallet de demostración. La entrega actual cubre la experiencia local del Sprint 1; no es una integración financiera ni una cuenta real.
+Frontend React + TypeScript + Vite para el onboarding demo: ingreso de datos sintéticos, verificación OTP, creación de PIN y bienvenida con el nombre y saldo devueltos por la API.
 
-## Ejecutar la demo
+La interfaz y el cliente HTTP están implementados y probados. El backend Quarkus ejecutable está en `backend/` y publica el [contrato de endpoints](../docs/ENDPOINTS.md). Las pruebas REST y frontend están automatizadas; aún falta verificar el recorrido integrado con Mailpit real.
 
-Requisitos: Node.js y npm.
+## Ejecutar
+
+Requisitos: Node.js y npm. Desde `frontend/`:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Abre la URL local que muestra Vite y completa el recorrido:
+Vite muestra la URL local. Por defecto, el cliente usa `http://localhost:8080/api/v1`. Para configurar otra base URL antes de iniciar Vite:
 
-1. En **Activa tu wallet**, ingresa un alias ficticio de 3 a 20 caracteres ASCII: letras sin acento, números o guion bajo. Por ejemplo, `demo_user`. No se aceptan espacios, guiones ni acentos. Es una regla exclusiva de la demo, no un requisito KYC.
-2. Continúa a **Revisar y activar** y confirma la activación.
-3. En la wallet activa, elige **Hacer una transferencia**. Revisa los valores fijos antes de confirmar: destinataria **María Demo**, importe **S/ 5.00** (500 céntimos, PEN).
-4. La respuesta exitosa simulada muestra una referencia única con prefijo `DEMO` (por ejemplo, `DEMO-000001`). Abre **Ver historial** para ver ese pago y su referencia.
+```powershell
+$env:VITE_API_BASE_URL = 'http://localhost:8080/api/v1'
+npm run dev
+```
 
-La demo no ofrece un control para generar timeout o error; el servicio local implementa la ruta feliz. La interfaz contempla los estados de resultado sin confirmar y error técnico para distinguirlos de un pago exitoso o un historial vacío cuando se integre un servicio que pueda devolverlos.
+La UI solicita tipo y número de documento y correo, después OTP y PIN. El estado del onboarding lo determina el backend; el frontend consulta cada tres segundos mientras el OTP está pendiente y detiene el polling al verificarlo o cuando falla la solicitud.
 
-## Tecnología
+## Demo y límites
 
-- React + TypeScript + Vite.
+- Usar únicamente datos sintéticos; no es KYC ni una verificación de identidad productiva.
+- El backend debe cargar fixtures sintéticos en H2 en memoria. Reiniciar el backend limpia el estado de demo. El frontend no incluye datos de cliente para el flujo normal.
+- Mailpit en Podman captura el SMTP local; no se envía correo externo.
+- El OTP vence a los cinco minutos, permite tres intentos y no se reenvía.
+- La wallet muestra el saldo ficticio PEN `10000` céntimos recibido del backend. La entrada visual de pagos es solo informativa: esta demo no procesa pagos, transferencias ni retiros.
+- El flujo integrado requiere el backend y Mailpit en ejecución; el frontend por sí solo no completa una activación. Consulta [backend/README.md](../backend/README.md) para iniciarlos.
 
-El frontend consume la API del backend Quarkus; no se conecta directamente a la base de datos.
-Mostrar solo los datos requeridos en cada pantalla; no escribir DNI, nombre, apellido, correo, OTP o PIN en consola, telemetría, URLs ni mensajes de error. En capturas y vistas de revisión, ofuscar datos personales cuando no se requiera verlos completos. Mantener el token de seguimiento solo en memoria de sesión y no guardar datos personales en `localStorage`.
+Consulta las [decisiones del proyecto](../docs/decisions-assumptions-limitations.md), la [especificación de onboarding](../docs/onboarding.md) y el [README del backend](../backend/README.md) para el estado de sus componentes.
 
-Los comandos de ejecución se documentarán cuando se configure el proyecto. Consultar el [contrato API](../docs/ENDPOINTS.md) y las [pruebas](../docs/TESTING.md).
+## Scripts
+
+Desde `frontend/`, definidos en `package.json`:
+
+```bash
+npm run dev
+npm test
+npm run lint
+npm run build
+npm run preview
+```
+
+Las pruebas frontend verifican validación, transiciones de UI y contrato del cliente HTTP; no sustituyen las pruebas de integración con el backend.
+
+## Privacidad
+
+El token de seguimiento, DNI, correo, OTP y PIN se mantienen solo en memoria durante su uso y no se guardan en `localStorage` ni `sessionStorage`. El formulario limpia DNI/correo después del inicio y limpia OTP/PIN después de verificar o completar. El frontend no escribe esos datos en consola y muestra mensajes de error seguros del cliente, no cuerpos de error sin filtrar.
