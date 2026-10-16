@@ -1,4 +1,4 @@
-# Historia 4: Pagos fallidos y rutas de soporte
+# Historia 4: Pagos fallidos y reversos — rutas de soporte
 
 ## 1. Summary
 
@@ -9,7 +9,7 @@ incidentes de forma predecible.
 **Resultado esperado:** escenario de fallo reproducible, orientación visible y
 registro de soporte. La demo elige un caso fallido o expirado; los pagos
 ejecutados se derivan a investigación o disputa. Fuente:
-[Hallazgos.md](../Hallazgos.md), Sprint 2, Historia 4.
+[Hallazgos.md](./Hallazgos.md), Sprint 2, Historia 4.
 
 ## 2. Scope
 
@@ -49,6 +49,8 @@ ejecutados se derivan a investigación o disputa. Fuente:
   resolución.
 - Una transferencia ya ejecutada no se presenta como fallida ni como reversada
   automáticamente.
+- Los mensajes no exponen datos sensibles y distinguen claramente un fallo de
+  una transferencia ya ejecutada.
 
 ## 7. Plan de validación
 
@@ -56,8 +58,9 @@ ejecutados se derivan a investigación o disputa. Fuente:
   referencia, acción y estado de resolución.
 - **Pruebas funcionales:** recorrer el caso elegido; comprobar la orientación
   visible y el registro de soporte.
-- **Seguridad:** comprobar que el resultado de soporte no convierte una
-  transferencia ejecutada en fallida ni dispara un reverso automático.
+- **Seguridad:** comprobar que los mensajes no exponen datos sensibles, que se
+  distingue un fallo de una transferencia ejecutada y que esta última no se
+  muestra como reversada automáticamente.
 - **Evidencia requerida:** salida de pruebas y pasos o capturas del escenario,
   incluida la ruta de soporte.
 
@@ -73,8 +76,9 @@ ejecutados se derivan a investigación o disputa. Fuente:
   mínima de soporte; presentar la ruta sugerida.
 - **QA:** comprobar el caso acordado; comprobar orientación y registro; verificar
   que un pago ejecutado no se muestre como fallido o reversado automáticamente.
-- **Cyber:** revisar el tratamiento del escenario disputado; comprobar que la
-  demo no ofrece ni ejecuta reversos reales.
+- **Cyber:** revisar el tratamiento del escenario disputado y los mensajes para
+  evitar exposición de datos sensibles; comprobar que un pago ejecutado se
+  distingue de un fallo y que la demo no ofrece ni ejecuta reversos reales.
 
 ## 9. Preguntas abiertas
 

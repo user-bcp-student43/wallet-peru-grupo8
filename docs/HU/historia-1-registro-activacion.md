@@ -7,7 +7,7 @@ onboarding guiado y saber cuál es el siguiente paso, para activar mi wallet de
 demo y empezar a pagar.
 
 **Resultado esperado:** onboarding reproducible que active una wallet de demo.
-Fuente: [Hallazgos.md](../Hallazgos.md), Sprint 1, Historia 1.
+Fuente: [Hallazgos.md](./Hallazgos.md), Sprint 1, Historia 1.
 
 ## 2. Scope
 
@@ -43,6 +43,7 @@ Fuente: [Hallazgos.md](../Hallazgos.md), Sprint 1, Historia 1.
 - Un registro válido persiste su estado y activa la wallet de demo al completarse.
 - La documentación enumera los campos acordados y declara que no constituyen
   KYC productivo.
+- El flujo utiliza datos ficticios y no expone información sensible.
 
 ## 7. Plan de validación
 
@@ -51,7 +52,8 @@ Fuente: [Hallazgos.md](../Hallazgos.md), Sprint 1, Historia 1.
 - **Pruebas funcionales:** completar un registro válido y otro incompleto o
   inválido; verificar el paso indicado y el mensaje de corrección.
 - **Seguridad:** comprobar que el flujo y su documentación no se presentan como
-  KYC productivo; usar únicamente datos ficticios.
+  KYC productivo; verificar el uso de datos ficticios y que no se exponga
+  información sensible.
 - **Evidencia requerida:** salida de pruebas y documentación de campos y
   supuestos actualizada.
 
@@ -68,7 +70,7 @@ Fuente: [Hallazgos.md](../Hallazgos.md), Sprint 1, Historia 1.
 - **QA:** probar registro válido; probar datos incompletos; probar datos inválidos
   y confirmar que no se activa la wallet.
 - **Cyber:** revisar el uso de datos ficticios; verificar que el flujo no se
-  describe como KYC productivo.
+  describe como KYC productivo y que no exponga información sensible.
 
 ## 9. Preguntas abiertas
 

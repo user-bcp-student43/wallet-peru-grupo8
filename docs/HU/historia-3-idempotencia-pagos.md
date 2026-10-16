@@ -8,7 +8,7 @@ reintentos.
 
 **Resultado esperado:** escenario repetible en el que el mismo intento devuelve
 el resultado original y existe una única transacción. Fuente:
-[Hallazgos.md](../Hallazgos.md), Sprint 2, Historia 3.
+[Hallazgos.md](./Hallazgos.md), Sprint 2, Historia 3.
 
 ## 2. Scope
 
@@ -44,6 +44,7 @@ el resultado original y existe una única transacción. Fuente:
 - Tras dos solicitudes iguales, existe un único pago y ambas respuestas
   representan el mismo resultado.
 - El frontend reutiliza la clave al reintentar la misma operación.
+- Las claves de idempotencia no exponen datos sensibles.
 
 ## 7. Plan de validación
 
@@ -51,8 +52,9 @@ el resultado original y existe una única transacción. Fuente:
   repetida.
 - **Pruebas funcionales:** enviar dos veces la misma solicitud; comprobar una
   sola transacción y el mismo resultado devuelto.
-- **Seguridad:** verificar que la idempotencia no cambia los controles de acceso
-  existentes en el flujo de pago.
+- **Seguridad:** comprobar que los reintentos no generen pagos duplicados, que
+  las claves de idempotencia no expongan datos sensibles y que se mantengan los
+  controles de acceso existentes.
 - **Evidencia requerida:** salida de pruebas y registro que distingue el intento
   original del duplicado, con evidencia de una sola transacción.
 
@@ -68,8 +70,9 @@ el resultado original y existe una única transacción. Fuente:
   reintentar esa misma operación; no tratar una operación nueva como reintento.
 - **QA:** enviar la misma solicitud dos veces; comprobar una sola transacción;
   comprobar que se devuelve el resultado original.
-- **Cyber:** comprobar que el control de idempotencia no sustituye los controles
-  de acceso existentes.
+- **Cyber:** comprobar que el control de idempotencia evita duplicados, que las
+  claves no exponen datos sensibles y que no sustituye los controles de acceso
+  existentes.
 
 ## 9. Preguntas abiertas
 

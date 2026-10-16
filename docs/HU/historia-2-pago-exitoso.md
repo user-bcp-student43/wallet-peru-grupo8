@@ -7,7 +7,7 @@ confirmación definitiva, para saber si el pago se realizó.
 
 **Resultado esperado:** recorrido de onboarding, wallet activa, pago simulado
 exitoso con referencia visible e historial. Fuente:
-[Hallazgos.md](../Hallazgos.md), Sprint 1, Historia 2.
+[Hallazgos.md](./Hallazgos.md), Sprint 1, Historia 2.
 
 ## 2. Scope
 
@@ -43,6 +43,8 @@ exitoso con referencia visible e historial. Fuente:
 - El pago queda disponible en el historial con el resultado y referencia de la
   operación.
 - La ruta de demo se puede recorrer desde onboarding hasta historial.
+- La confirmación y el historial no muestran información de otros usuarios ni
+  datos sensibles innecesarios.
 
 ## 7. Plan de validación
 
@@ -50,8 +52,10 @@ exitoso con referencia visible e historial. Fuente:
   exitoso en el historial.
 - **Pruebas funcionales:** recorrer onboarding, wallet activa, confirmación e
   historial con el escenario acordado.
-- **Seguridad:** usar destinatario e importe ficticios y verificar que el
-  proveedor simulado no se presenta como servicio real.
+- **Seguridad:** usar destinatario e importe ficticios; comprobar que la
+  confirmación y el historial no expongan información de otros usuarios ni datos
+  sensibles innecesarios; verificar que el proveedor simulado no se presente
+  como servicio real.
 - **Evidencia requerida:** salida real de pruebas y registro o capturas del
   recorrido y la referencia visible.
 
@@ -67,8 +71,10 @@ exitoso con referencia visible e historial. Fuente:
   resultado; hacer visible su referencia.
 - **QA:** recorrer el flujo completo; comprobar la referencia en confirmación;
   comprobar el pago en historial y registrar el resultado real.
-- **Cyber:** comprobar que los datos son ficticios; revisar que la demo identifica
-  claramente el proveedor como simulado.
+- **Cyber:** comprobar que los datos son ficticios; revisar que la confirmación y
+  el historial protegen la información de otros usuarios y evitan datos
+  sensibles innecesarios; verificar que la demo identifica claramente el
+  proveedor como simulado.
 
 ## 9. Preguntas abiertas
 
